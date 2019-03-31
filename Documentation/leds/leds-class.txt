@@ -43,9 +43,59 @@ LED Device Naming
 
 Is currently of the form:
 
-"devicename:colour:function"
+"devicename:color:function"
 
-There have been calls for LED properties such as colour to be exported as
+devicename: It should be provided only for LED class devices created by
+            hot-pluggable devices like USB ones. This name should refer to
+            a unique identifier created by the kernel, like e.g. phyN for
+            network devices or inputN for input devices, rather than to
+            the hardware. The information related to the product and
+            the bus to which given device is hooked is available in the sysfs
+            and can be retrieved using the tool: tools/leds/get_led_device_info.sh.
+
+color: one of the color strings from led_colors array defined
+       in drivers/leds/led-core.c.
+
+function: one of the LED_FUNCTION* definitions from the header
+          include/dt-bindings/leds/common.h.
+
+If required color or function is missing, please submit a patch
+to linux-leds@vger.kernel.org, adding required entries.
+
+It is possible that more than one LED with the same color and function will
+be required for given platform, differing only with an ordinal number.
+In this case it is preferable to just concatenate the predefined LED_FUNCTION*
+name with required "-N" suffix in the driver. fwnode based drivers can use
+function-enumerator property for that and then the concatenation will be handled
+automatically by the LED core on LED class device registration.
+
+There might be still LED class drivers around using vendor or product name
+for devicename, but this approach is now deprecated as it doesn't convey
+any added value. Product information can be found in other places in sysfs
+(see tools/leds/get_led_device_info.sh). The only valid use case when presence
+of devicename section can be useful is when other LED class device with the same
+color and function appears in the system. This can happen unpredicatably only
+in case of hot-pluggable devices like USB ones or added via Device Tree overlays.
+
+In this case filling devicename section will allow to avoid a potential clash
+with LEDs already present in the system, which would force LED core to using
+its mechanism for LED name conflict resolution. The mechanism adds numerical
+suffix (e.g. "_1", "_2", "_3" etc.) to the requested LED class device name
+in case it is already in use.
+
+Examples of proper LED names:
+
+"red:disk"
+"white:flash"
+"red:indicator"
+":mmc"
+"blue:"
+"phy1:green:wlan"
+"phy3::wlan"
+"input2::kbd_backlight"
+"input5:blue:kbd_backlight"
+
+There have been calls for LED properties such as color to be exported as
 individual led class attributes. As a solution which doesn't incur as much
 overhead, I suggest these become part of the device name. The naming scheme
 above leaves scope for further attributes should they be needed. If sections
