@@ -62,6 +62,9 @@ function: one of the LED_FUNCTION* definitions from the header
 If required color or function is missing, please submit a patch
 to linux-leds@vger.kernel.org, adding required entries.
 
+The exact meaning of LED function name depends on whether it has devicename
+section filled or left blank. See Documentation/leds/led-functions.txt.
+
 It is possible that more than one LED with the same color and function will
 be required for given platform, differing only with an ordinal number.
 In this case it is preferable to just concatenate the predefined LED_FUNCTION*
